@@ -69,13 +69,13 @@ public class AuthAction extends ActionBase {
             // 認証成功の場合
 
             if (checkToken()) {
-                // ログインした従業員のDBを設定
+                // ログインした従業員のDBデータを取得
                 EmployeeView ev = service.findOne(code, plainPass, pepper);
                 // セッションにログインした従業員を設定
                 putSessionScope(AttributeConst.LOGIN_EMP, ev);
                 // セッションにログイン完了のフラッシュメッセージを設定
                 putSessionScope(AttributeConst.FLUSH, MessageConst.I_LOGINED.getMessage());
-                // トップへリダイレクト
+                // トップページへリダイレクト
                 redirect(ForwardConst.ACT_TOP, ForwardConst.CMD_INDEX);
             }
         } else {
@@ -90,5 +90,22 @@ public class AuthAction extends ActionBase {
             // ログイン画面を表示
             forward(ForwardConst.FW_LOGIN);
         }
+    }
+
+    /**
+     * ログイン処理を行う
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void logout() throws ServletException, IOException {
+        // セッションからログイン従業員のパラメータを削除
+        removeSessionScope(AttributeConst.LOGIN_EMP);
+
+        // セッションにログアウト時のフラッシュメッセージを追加
+        putSessionScope(AttributeConst.FLUSH, MessageConst.I_LOGOUT.getMessage());
+
+        // ログイン画面にリダイレクト
+        redirect(ForwardConst.ACT_AUTH, ForwardConst.CMD_SHOW_LOGIN);
+
     }
 }
