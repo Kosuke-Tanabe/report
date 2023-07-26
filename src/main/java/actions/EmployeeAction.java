@@ -100,15 +100,14 @@ public class EmployeeAction extends ActionBase {
                     toNumber(getRequestParam(AttributeConst.EMP_ADMIN_FLG)),
                     null,
                     null,
-                    AttributeConst.DEL_FLAG_FALSE.getIntegerValue()
-                    );
+                    AttributeConst.DEL_FLAG_FALSE.getIntegerValue());
 
             // アプリケーションスコープからpepper文字列を取得
             String pepper = getContextScope(PropertyConst.PEPPER);
 
             List<String> errors = service.create(ev, pepper);
 
-            if(errors.size() > 0) {
+            if (errors.size() > 0) {
                 // エラーが存在する場合
                 putRequestScope(AttributeConst.TOKEN, getTokenId());
                 putRequestScope(AttributeConst.EMPLOYEE, ev);
@@ -125,5 +124,26 @@ public class EmployeeAction extends ActionBase {
                 redirect(ForwardConst.ACT_EMP, ForwardConst.CMD_INDEX);
             }
         }
+    }
+
+    /**
+     * 詳細画面を表示する
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void show() throws ServletException, IOException {
+        // idを条件に従業員データを取得する
+        EmployeeView ev = service.findOne(toNumber(getRequestParam(AttributeConst.EMP_ID)));
+
+        if(ev == null || ev.getDeleteFlag() == AttributeConst.DEL_FLAG_TRUE.getIntegerValue()) {
+            // データが取得出来ない、もしくは論理削除されている場合、エラー画面表示
+            forward(ForwardConst.FW_ERR_UNKNOWN);
+            return;
+        }
+
+        putRequestScope(AttributeConst.EMPLOYEE, ev);
+
+        // 詳細画面表示
+        forward(ForwardConst.FW_EMP_SHOW);
     }
 }
