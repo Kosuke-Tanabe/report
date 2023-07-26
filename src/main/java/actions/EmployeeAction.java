@@ -135,7 +135,7 @@ public class EmployeeAction extends ActionBase {
         // idを条件に従業員データを取得する
         EmployeeView ev = service.findOne(toNumber(getRequestParam(AttributeConst.EMP_ID)));
 
-        if(ev == null || ev.getDeleteFlag() == AttributeConst.DEL_FLAG_TRUE.getIntegerValue()) {
+        if (ev == null || ev.getDeleteFlag() == AttributeConst.DEL_FLAG_TRUE.getIntegerValue()) {
             // データが取得出来ない、もしくは論理削除されている場合、エラー画面表示
             forward(ForwardConst.FW_ERR_UNKNOWN);
             return;
@@ -145,5 +145,29 @@ public class EmployeeAction extends ActionBase {
 
         // 詳細画面表示
         forward(ForwardConst.FW_EMP_SHOW);
+    }
+
+    /**
+     * 編集画面を表示する
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void edit() throws ServletException, IOException {
+        // idを条件に従業員データを取得
+        EmployeeView ev = service.findOne(toNumber(getRequestParam(AttributeConst.EMP_ID)));
+
+        if (ev == null || ev.getDeleteFlag() == AttributeConst.DEL_FLAG_TRUE.getIntegerValue()) {
+            // データが取得出来なかった、もしくは論理削除済みの場合エラー画面表示
+            forward(ForwardConst.FW_ERR_UNKNOWN);
+            return;
+        }
+
+        // CSRF対策 tokenのチェック
+        putRequestScope(AttributeConst.TOKEN, getTokenId());
+        // 取得した従業員番号
+        putRequestScope(AttributeConst.EMPLOYEE, ev);
+
+        // 変種画面を表示する
+        forward(ForwardConst.FW_EMP_EDIT);
     }
 }
