@@ -62,6 +62,7 @@ public class FrontController extends HttpServlet {
 
             // ActionBaseオブジェクトにキャスト
             action = (ActionBase)(type.asSubclass(ActionBase.class).getDeclaredConstructor().newInstance());
+
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | SecurityException
                 | IllegalArgumentException | InvocationTargetException| NoSuchMethodException e) {
             // リクエストからパラメータに設定されているactionの値が不正の場合
