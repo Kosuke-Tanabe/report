@@ -166,4 +166,31 @@ public class ReportAction extends ActionBase {
 
         }
     }
+
+    /**
+     * 編集画面を表示する
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void edit() throws ServletException, IOException {
+        // idを条件に日報データを取得
+        ReportView rv = service.findOne(toNumber(getRequestParam(AttributeConst.REP_ID)));
+
+        // セッションからログイン中の従業員情報取得
+        EmployeeView ev = (EmployeeView) getSessionScope(AttributeConst.LOGIN_EMP);
+
+        if (ev == null || ev.getId() != rv.getEmployee().getId()) {
+            // 日報が存在しない、もしくは従業員IDが作成者のもので無い場合、エラー画面表示
+            forward(ForwardConst.FW_ERR_UNKNOWN);
+            return;
+        } else {
+            // CSRF対策用トークン
+            putRequestScope(AttributeConst.TOKEN, getTokenId());
+            // 日報データ
+            putRequestScope(AttributeConst.REPORT, rv);
+
+            // 編集画面を表示
+            forward(ForwardConst.FW_REP_EDIT);
+        }
+    }
 }
