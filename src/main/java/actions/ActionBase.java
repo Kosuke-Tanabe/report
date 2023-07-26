@@ -112,7 +112,7 @@ public abstract class ActionBase {
      * @throws ServletException
      * @throws IOException
      */
-    protected boolean cehckToken() throws ServletException, IOException {
+    protected boolean checkToken() throws ServletException, IOException {
         // パラメータからtokenの値を取得
         String _token = getRequestParam(AttributeConst.TOKEN);
 
