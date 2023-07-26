@@ -6,10 +6,12 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
+import actions.views.EmployeeView;
 import actions.views.ReportView;
 import constants.AttributeConst;
 import constants.ForwardConst;
 import constants.JpaConst;
+import constants.MessageConst;
 import services.ReportService;
 
 /**
@@ -75,7 +77,7 @@ public class ReportAction extends ActionBase {
         //CSRF対策用トークン
         putRequestScope(AttributeConst.TOKEN, getTokenId());
 
-      // 日報情報の空インスタンスに、日報の日付＝今日の日付を設定する
+        // 日報情報の空インスタンスに、日報の日付＝今日の日付を設定する
         ReportView rv = new ReportView();
         rv.setReportDate(LocalDate.now());
         // 日付のみ設定済みの日報インスタンス
@@ -85,4 +87,61 @@ public class ReportAction extends ActionBase {
         forward(ForwardConst.FW_REP_NEW);
     }
 
+    /**
+     * 新規登録を行う
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void create() throws ServletException, IOException {
+        //CSRF対策 tokenのチェック
+        if (checkToken()) {
+            // 日報の日付が入力されていなければ今日の日付を設定
+            LocalDate day = null;
+
+            if (getRequestParam(AttributeConst.REP_DATE) == null
+                    || getRequestParam(AttributeConst.REP_DATE).equals("")) {
+                day = LocalDate.now();
+            } else {
+                day = LocalDate.parse(getRequestParam(AttributeConst.REP_DATE));
+            }
+
+            // セッションからログイン中の従業員情報取得
+            EmployeeView ev = (EmployeeView) getSessionScope(AttributeConst.LOGIN_EMP);
+
+            // パラメータを元に日報情報インスタンス作成
+            ReportView rv = new ReportView(
+                    null,
+                    ev,
+                    day,
+                    getRequestParam(AttributeConst.REP_TITLE),
+                    getRequestParam(AttributeConst.REP_CONTENT),
+                    null,
+                    null);
+
+            // 日報情報登録
+            List<String> errors = service.create(rv);
+
+            if (errors.size() > 0) {
+                // エラーの場合
+
+                //CSRF対策用トークン
+                putRequestScope(AttributeConst.TOKEN, getTokenId());
+                //入力された日報情報
+                putRequestScope(AttributeConst.REPORT, rv);
+                //エラーのリスト
+                putRequestScope(AttributeConst.ERR, errors);
+
+                // 新規登録画面表示
+                forward(ForwardConst.FW_REP_NEW);
+            } else {
+                // エラーでない場合
+
+                // セッションスコープに登録完了のフラッシュメッセージを設定
+                putSessionScope(AttributeConst.FLUSH, MessageConst.I_REGISTERED.getMessage());
+
+                // 一覧画面にリダイレクト
+                redirect(ForwardConst.ACT_REP, ForwardConst.CMD_INDEX);
+            }
+        }
+    }
 }
