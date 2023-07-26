@@ -144,4 +144,26 @@ public class ReportAction extends ActionBase {
             }
         }
     }
+
+    /**
+     * 詳細画面を表示する
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void show() throws ServletException, IOException {
+        // idを条件に日報データを取得
+        ReportView rv = service.findOne(toNumber(getRequestParam(AttributeConst.REP_ID)));
+
+        if (rv == null) {
+            // 該当の日報データが存在しない場合、エラー画面表示
+            forward(ForwardConst.FW_ERR_UNKNOWN);
+        } else {
+            // エラーでない場合
+
+            putRequestScope(AttributeConst.REPORT, rv);
+
+            forward(ForwardConst.FW_REP_SHOW);
+
+        }
+    }
 }
